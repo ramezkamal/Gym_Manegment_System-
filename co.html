@@ -1,0 +1,2096 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eagle Gym - نظام إدارة النادي</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1E3A8A">
+  <link rel="apple-touch-icon" href="icon.png">
+  <style>
+    :root {
+      --primary-color: #1E3A8A;
+      --secondary-color: #10B981;
+      --accent-color: #F97316;
+      --text-color: #1E3A8A;
+      --bg-color: #F9FAFB;
+      --card-bg: #FFFFFF;
+      --shadow: 0 8px 16px rgba(0,0,0,0.2);
+      --glow: 0 0 12px rgba(249,115,22,0.5);
+      --transition: all 0.3s ease-in-out;
+    }
+    [data-theme="dark"] {
+      --primary-color: #111827;
+      --secondary-color: #34D399;
+      --accent-color: #F97316;
+      --text-color: #F9FAFB;
+      --bg-color: #0F172A;
+      --card-bg: #1F2937;
+      --shadow: 0 8px 16px rgba(0,0,0,0.4);
+      --glow: 0 0 12px rgba(249,115,22,0.7);
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Cairo', sans-serif;
+    }
+    body {
+      background: var(--bg-color);
+      color: var(--text-color);
+      direction: rtl;
+      text-align: right;
+      overflow-x: hidden;
+      position: relative;
+    }
+    #particles-js {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.4;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .header {
+      text-align: center;
+      padding: 40px;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: #F9FAFB;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+      animation: bounceIn 1s ease;
+    }
+    .header h1 {
+      font-size: 2.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .header i {
+      font-size: 2.5rem;
+      animation: bounceRotate 2s infinite ease-in-out;
+      display: inline-block;
+    }
+    @keyframes bounceRotate {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      50% { transform: scale(1.2) rotate(10deg); }
+    }
+    .theme-toggle {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: var(--accent-color);
+      color: #FFF;
+      border: none;
+      padding: 12px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: var(--transition);
+      animation: pulse 2s infinite;
+    }
+    .theme-toggle:hover {
+      transform: scale(1.15);
+      box-shadow: var(--glow);
+    }
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+    .nav-button {
+      padding: 25px;
+      background: linear-gradient(135deg, var(--secondary-color), #059669);
+      color: #F9FAFB;
+      border: 2px solid var(--accent-color);
+      border-radius: 15px;
+      cursor: pointer;
+      font-size: 18px;
+      text-align: center;
+      transition: var(--transition);
+      animation: fadeInUp 0.5s ease;
+    }
+    .nav-button:hover {
+      transform: scale(1.08);
+      box-shadow: var(--glow);
+      background: linear-gradient(135deg, #059669, var(--secondary-color));
+      animation: swing 0.5s ease;
+    }
+    .section {
+      display: none;
+      background: var(--card-bg);
+      padding: 35px;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+      animation: slideInUp 0.6s ease-in;
+    }
+    .section.active {
+      display: block;
+    }
+    .form-group {
+      margin-bottom: 25px;
+      animation: fadeIn 0.5s ease-in;
+      animation-delay: calc(0.1s * var(--form-index));
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 700;
+      color: #000000;
+      font-size: 16px;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 14px;
+      border: 2px solid #E5E7EB;
+      border-radius: 10px;
+      background: var(--card-bg);
+      color: var(--text-color);
+      font-size: 16px;
+      transition: var(--transition);
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color: var(--secondary-color);
+      box-shadow: var(--glow);
+      outline: none;
+    }
+    .form-group input:invalid, .form-group select:invalid {
+      border-color: #DC2626;
+    }
+    .btn {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 10px;
+      font-size: 18px;
+      transition: var(--transition);
+      animation: pulse 2s infinite;
+    }
+    .btn:hover {
+      animation: tada 0.5s ease;
+    }
+    .btn-primary {
+      background: var(--secondary-color);
+      color: #F9FAFB;
+    }
+    .btn-primary:hover {
+      background: #059669;
+      box-shadow: var(--glow);
+      transform: scale(1.05);
+    }
+    .btn-danger {
+      background: #DC2626;
+      color: #F9FAFB;
+    }
+    .btn-danger:hover {
+      background: #B91C1C;
+      box-shadow: 0 0 15px rgba(220,38,38,0.5);
+    }
+    .btn-back {
+      background: var(--primary-color);
+      color: #F9FAFB;
+    }
+    .btn-back:hover {
+      background: #3B4A8A;
+      box-shadow: var(--glow);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 25px;
+      background: var(--card-bg);
+      border-radius: 15px;
+      box-shadow: var(--shadow);
+      animation: fadeInUp 0.6s ease;
+    }
+    th, td {
+      padding: 15px;
+      border: 1px solid #E5E7EB;
+      text-align: right;
+    }
+    th {
+      background: var(--primary-color);
+      color: #F9FAFB;
+      font-weight: 700;
+    }
+    td a {
+      color: var(--secondary-color);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+    td a:hover {
+      color: #059669;
+      text-decoration: underline;
+    }
+    .membership-card {
+      max-width: 400px;
+      width: 100%;
+      margin: 25px auto;
+      background: linear-gradient(135deg, #1B263B, #F97316);
+      border-radius: 25px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255,255,255,0.3);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #FFFFFF;
+      animation: rotateIn 0.8s ease;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .membership-card:hover {
+      transform: scale(1.03) rotate(1deg);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.3), var(--glow);
+    }
+    .membership-card .front {
+      width: 100%;
+      padding: 25px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .membership-card h3 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+      animation: pulse 2s infinite;
+    }
+    .membership-card p {
+      font-size: 16px;
+      margin: 10px 0;
+      font-weight: 500;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    .membership-card .qr-container {
+      background: #FFFFFF;
+      padding: 12px;
+      border-radius: 12px;
+      margin-top: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .membership-card .qr-container img {
+      width: 150px;
+      height: 150px;
+    }
+    #camera {
+      width: 100%;
+      max-width: 500px;
+      height: auto;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      border: 3px solid var(--secondary-color);
+      box-shadow: var(--shadow);
+    }
+    .camera-placeholder {
+      width: 100%;
+      max-width: 500px;
+      height: 200px;
+      background: #E5E7EB;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      color: var(--text-color);
+      font-weight: 700;
+      animation: fadeIn 0.5s ease;
+    }
+    .footer {
+      text-align: center;
+      padding: 25px;
+      color: #F9FAFB;
+      font-size: 16px;
+      background: var(--primary-color);
+      border-radius: 15px;
+      margin-top: 25px;
+      box-shadow: var(--shadow);
+    }
+    .login-footer {
+      text-align: center;
+      margin-top: 25px;
+      color: var(--text-color);
+      font-size: 16px;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.3s ease;
+    }
+    .modal-content {
+      background: var(--card-bg);
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      max-width: 450px;
+      width: 90%;
+      text-align: center;
+      animation: zoomIn 0.5s ease;
+    }
+    .modal-content h3 {
+      color: var(--text-color);
+      margin-bottom: 25px;
+      font-size: 22px;
+    }
+    .modal-content select, .modal-content input {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 20px;
+      border: 2px solid #E5E7EB;
+      border-radius: 10px;
+      background: var(--card-bg);
+      color: var(--text-color);
+      font-size: 16px;
+    }
+    .close-modal {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      font-size: 28px;
+      cursor: pointer;
+      color: var(--text-color);
+      transition: var(--transition);
+    }
+    .close-modal:hover {
+      transform: scale(1.2);
+      color: var(--accent-color);
+    }
+    .spinner {
+      display: none;
+      border: 5px solid #F9FAFB;
+      border-top: 5px solid var(--secondary-color);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 25px auto;
+    }
+    .toast {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      background: var(--primary-color);
+      color: #F9FAFB;
+      padding: 12px 25px;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      z-index: 2000;
+      animation: slideInRight 0.4s ease, fadeOut 0.4s ease 2.5s forwards;
+    }
+    .toast.error {
+      background: #DC2626;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes slideInRight {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+    @keyframes fadeOut {
+      to { opacity: 0; }
+    }
+    @keyframes zoomIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    @keyframes bounceRotate {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      50% { transform: scale(1.2) rotate(10deg); }
+    }
+    @media (max-width: 768px) {
+      .container { padding: 15px; }
+      .nav-grid { grid-template-columns: 1fr; }
+      .nav-button { font-size: 16px; padding: 20px; }
+      .header { padding: 30px; }
+      .header h1 { font-size: 2rem; }
+      .header i { font-size: 2rem; }
+      .membership-card { max-width: 100%; padding: 20px; }
+      .membership-card h3 { font-size: 24px; }
+      .membership-card p { font-size: 14px; }
+      .membership-card .qr-container img { width: 130px; height: 130px; }
+      .form-group input, .form-group select, .form-group textarea { font-size: 14px; }
+      .btn { font-size: 16px; padding: 12px 20px; }
+    }
+    .position-selector {
+      margin: 20px 0;
+      text-align: right;
+    }
+    .position-selector label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 700;
+      color: var(--text-color);
+    }
+    .position-selector select {
+      width: 100%;
+      padding: 14px;
+      border: 2px solid #E5E7EB;
+      border-radius: 10px;
+      background: var(--card-bg);
+      color: var(--text-color);
+      font-size: 16px;
+    }
+    .users-table th, .users-table td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: right;
+    }
+    .users-table th {
+      background: var(--primary-color);
+      color: white;
+    }
+    .user-actions button {
+      margin: 0 5px;
+      padding: 6px 10px;
+      font-size: 14px;
+    }
+    .add-user-btn {
+      display: block;
+      margin: 20px auto 30px;
+      padding: 14px 28px;
+      background: var(--accent-color);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: var(--glow);
+    }
+    .add-user-btn:hover {
+      transform: scale(1.05);
+      background: #e6610d;
+    }
+    .membership-card-print {
+      width: 400px;
+      height: 500px;
+      background: linear-gradient(135deg, #1B263B, #F97316);
+      border-radius: 25px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      text-align: center;
+      color: #FFFFFF;
+      font-family: 'Cairo', sans-serif;
+      position: relative;
+      overflow: hidden;
+      font-weight: 700;
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+    }
+    .membership-card-print h3 {
+      font-size: 26px;
+      margin-bottom: 15px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+    .membership-card-print p {
+      font-size: 16px;
+      margin: 8px 0;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      line-height: 1.5;
+      color: #FFFFFF;
+    }
+    .membership-card-print .qr-container {
+      background: #FFFFFF;
+      padding: 15px;
+      border-radius: 15px;
+      margin-top: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .membership-card-print .qr-container img {
+      width: 180px;
+      height: 180px;
+      object-fit: contain;
+      filter: brightness(1.2);
+    }
+
+    /* شاشة الباسورد الأولي */
+    #dev-password-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.95);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      font-family: 'Cairo', sans-serif;
+    }
+    #dev-password-screen .box {
+      background: #fff;
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      max-width: 400px;
+      width: 90%;
+    }
+    #dev-password-screen h2 {
+      color: #1E3A8A;
+      margin-bottom: 25px;
+      font-size: 24px;
+    }
+    #dev-password-screen input {
+      width: 100%;
+      padding: 16px;
+      margin-bottom: 20px;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      font-size: 18px;
+      text-align: center;
+    }
+    #dev-password-screen button {
+      padding: 16px 30px;
+      background: #10B981;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    #dev-password-screen button:hover {
+      background: #059669;
+      transform: scale(1.05);
+    }
+    #dev-password-screen p {
+      color: #666;
+      font-size: 14px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <!-- شاشة الباسورد الأولي -->
+  <div id="dev-password-screen">
+    <div class="box">
+      <h2>🔒 أدخل باسورد المطور</h2>
+      <input type="password" id="dev-password" placeholder="كلمة السر" autofocus>
+      <button onclick="checkDevPassword()">دخول</button>
+      <p>كلمة السر الافتراضية: <strong>eagle123</strong></p>
+    </div>
+  </div>
+
+  <div id="particles-js"></div>
+  <div class="container">
+    <div class="header animate__animated animate__bounceIn">
+      <h1><i class="fas fa-dumbbell"></i> Eagle Gym</h1>
+      <h3>مرحبًا بكم في Eagle Gym</h3>
+      <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+    </div>
+
+    <!-- تسجيل الدخول -->
+    <div id="login" class="section animate__animated animate__fadeInUp">
+      <h2><i class="fas fa-sign-in-alt"></i> تسجيل الدخول</h2>
+      <div class="form-group">
+        <label for="username">اسم المستخدم *</label>
+        <input type="text" id="username" placeholder="أدخل اسم المستخدم" required>
+      </div>
+      <div class="form-group">
+        <label for="password">كلمة المرور *</label>
+        <input type="password" id="password" placeholder="أدخل كلمة المرور" required>
+      </div>
+      <button class="btn btn-primary" onclick="login()"><i class="fas fa-sign-in-alt"></i> تسجيل الدخول</button>
+      <div class="login-footer">
+        <p>By Ramez Kamal</p>
+        <p>01002160012</p>
+      </div>
+    </div>
+
+    <!-- الصفحة الرئيسية -->
+    <div id="dashboard" class="section animate__animated animate__fadeInUp">
+      <div class="nav-grid">
+        <button class="nav-button" onclick="showSection('add-client')"><i class="fas fa-user-plus"></i> إضافة عميل</button>
+        <button class="nav-button" onclick="showSection('clients')"><i class="fas fa-users"></i> قاعدة العملاء</button>
+        <button class="nav-button" onclick="showSection('subscriptions')"><i class="fas fa-calendar-alt"></i> الاشتراكات</button>
+        <button class="nav-button" onclick="showSection('checkin')"><i class="fas fa-camera"></i> الحضور اليومي</button>
+        <button class="nav-button" onclick="showSection('admin')"><i class="fas fa-cog"></i> لوحة التحكم</button>
+        <button class="nav-button" onclick="showSection('current-users')"><i class="fas fa-user-shield"></i> المستخدمون الحاليون</button>
+        <button class="nav-button" onclick="logout()"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</button>
+      </div>
+    </div>
+
+    <!-- إضافة عميل -->
+    <div id="add-client" class="section animate__animated animate__slideInUp">
+      <h2><i class="fas fa-user-plus"></i> إضافة عميل</h2>
+      <div class="form-group" style="--form-index: 1">
+        <label for="client-name">الاسم الكامل *</label>
+        <input type="text" id="client-name" required>
+      </div>
+      <div class="form-group" style="--form-index: 2">
+        <label for="client-phone">الهاتف *</label>
+        <input type="tel" id="client-phone" required>
+      </div>
+      <div class="form-group" style="--form-index: 3">
+        <label for="client-id-number">الرقم القومي (اختياري)</label>
+        <input type="text" id="client-id-number" pattern="[0-9]{14}" placeholder="مثال: 29901011234567">
+      </div>
+      <div class="form-group" style="--form-index: 4">
+        <label for="client-birthdate">تاريخ الميلاد *</label>
+        <input type="date" id="client-birthdate" required>
+      </div>
+      <div class="form-group" style="--form-index: 5">
+        <label for="client-height">الطول (سم)</label>
+        <input type="number" id="client-height" min="0">
+      </div>
+      <div class="form-group" style="--form-index: 6">
+        <label for="client-weight">الوزن (كجم)</label>
+        <input type="number" id="client-weight" min="0">
+      </div>
+      <div class="form-group" style="--form-index: 7">
+        <label for="client-address">العنوان</label>
+        <input type="text" id="client-address">
+      </div>
+      <div class="form-group" style="--form-index: 8">
+        <label for="client-subscription-type">نوع الباقه *</label>
+        <select id="client-subscription-type" onchange="toggleSubscriptionFields()">
+          <option value="">اختر نوع الباقه</option>
+          <option value="حصة">حصة</option>
+          <option value="كوينز">كوينز</option>
+          <option value="شهري">شهري</option>
+        </select>
+      </div>
+      <div id="monthly-details" style="display: none; margin-top: 20px; padding: 15px; border: 1px dashed #ccc; border-radius: 10px;">
+        <div class="form-group" style="--form-index: 9">
+          <label for="client-months">عدد الأشهر *</label>
+          <select id="client-months">
+            <option value="">اختر</option>
+            <option value="1">1 شهر</option>
+            <option value="2">2 شهور</option>
+            <option value="3">3 شهور</option>
+            <option value="4">4 شهور</option>
+            <option value="5">5 شهور</option>
+            <option value="6">6 شهور</option>
+            <option value="7">7 شهور</option>
+            <option value="8">8 شهور</option>
+            <option value="9">9 شهور</option>
+            <option value="10">10 شهور</option>
+            <option value="11">11 شهور</option>
+            <option value="12">12 شهر</option>
+          </select>
+        </div>
+        <div class="form-group" style="--form-index: 10">
+          <label for="client-end-option">طريقة الإنهاء *</label>
+          <select id="client-end-option" onchange="toggleEndOption()">
+            <option value="">اختر</option>
+            <option value="مفتوح">مفتوح</option>
+            <option value="حصص">عدد حصص</option>
+            <option value="يدوي">تحديد تاريخ يدوي</option>
+          </select>
+        </div>
+        <div id="session-count-field" style="display: none; margin-top: 10px;">
+          <label for="client-session-count">عدد الحصص *</label>
+          <input type="number" id="client-session-count" min="1" placeholder="مثال: 20" required>
+        </div>
+        <div id="manual-end-date-field" style="display: none; margin-top: 10px;">
+          <label for="client-end">تاريخ الانتهاء *</label>
+          <input type="date" id="client-end" required>
+        </div>
+        <div class="form-group" style="--form-index: 11">
+          <label for="client-start">تاريخ البدء *</label>
+          <input type="date" id="client-start" required>
+        </div>
+      </div>
+      <div id="koins-details" style="display: none; margin-top: 20px; padding: 15px; border: 1px dashed #ccc; border-radius: 10px;">
+        <div class="form-group" style="--form-index: 9">
+          <label for="client-koins-count">عدد الكوينز *</label>
+          <input type="number" id="client-koins-count" min="1" required placeholder="مثال: 10">
+        </div>
+        <div class="form-group" style="--form-index: 10">
+          <label for="client-start">تاريخ البدء *</label>
+          <input type="date" id="client-start" required>
+        </div>
+        <div class="form-group" style="--form-index: 11">
+          <label for="client-end">تاريخ الانتهاء *</label>
+          <input type="date" id="client-end" required>
+        </div>
+      </div>
+      <div class="form-group" style="--form-index: 12">
+        <label for="client-price">سعر الاشتراك</label>
+        <input type="number" id="client-price">
+      </div>
+      <div class="form-group" style="--form-index: 13">
+        <label for="client-payment">حالة الدفع</label>
+        <select id="client-payment">
+          <option value="مدفوع">مدفوع</option>
+          <option value="غير مدفوع">غير مدفوع</option>
+          <option value="دفع جزئي">دفع جزئي</option>
+        </select>
+      </div>
+      <div class="form-group" style="--form-index: 14">
+        <label for="client-notes">ملاحظات</label>
+        <textarea id="client-notes"></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="addClient()"><i class="fas fa-plus"></i> إضافة العميل</button>
+      <button class="btn btn-back" onclick="showSection('dashboard')"><i class="fas fa-arrow-right"></i> العودة</button>
+      <div class="spinner" id="card-spinner"></div>
+      <div id="qr-code" style="display: none;"></div>
+      <div id="membership-card" class="membership-card">
+        <div class="front"></div>
+      </div>
+    </div>
+
+    <!-- قاعدة العملاء -->
+    <div id="clients" class="section animate__animated animate__fadeInUp">
+      <h2><i class="fas fa-users"></i> قاعدة العملاء</h2>
+      <div class="form-group">
+        <label for="search-clients">ابحث بالاسم أو الهاتف أو ID</label>
+        <input type="text" id="search-clients" placeholder="ابحث بالاسم أو الهاتف أو ID">
+      </div>
+      <table id="clients-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>الاسم</th>
+            <th>الهاتف</th>
+            <th>نوع الاشتراك</th>
+            <th>حالة الدفع</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="spinner" id="clients-spinner"></div>
+      <button class="btn btn-primary" onclick="exportClients()"><i class="fas fa-file-excel"></i> تصدير إلى Excel</button>
+      <button class="btn btn-back" onclick="showSection('dashboard')"><i class="fas fa-arrow-right"></i> العودة</button>
+    </div>
+
+    <!-- ملف العميل -->
+    <div id="client-profile" class="section animate__animated animate__fadeInUp">
+      <h2><i class="fas fa-user"></i> ملف العميل</h2>
+      <table id="client-details"></table>
+      <div id="client-qr"></div>
+      <button class="btn btn-primary" onclick="editClient()"><i class="fas fa-edit"></i> تعديل</button>
+      <button class="btn btn-danger" onclick="deleteClient()"><i class="fas fa-trash"></i> حذف</button>
+      <button class="btn btn-back" onclick="showSection('clients')"><i class="fas fa-arrow-right"></i> العودة</button>
+    </div>
+
+    <!-- الاشتراكات -->
+    <div id="subscriptions" class="section animate__animated animate__fadeInUp">
+      <h2><i class="fas fa-calendar-alt"></i> الاشتراكات</h2>
+      <div class="form-group">
+        <label for="subscription-filter">فلتر</label>
+        <select id="subscription-filter" onchange="loadSubscriptions()">
+          <option value="all">الكل</option>
+          <option value="today">تنتهي اليوم</option>
+          <option value="tomorrow">تنتهي غدًا</option>
+          <option value="expired">منتهية</option>
+        </select>
+      </div>
+      <table id="subscriptions-table">
+        <thead>
+          <tr>
+            <th>الاسم</th>
+            <th>الهاتف</th>
+            <th>نوع الاشتراك</th>
+            <th>تاريخ البدء</th>
+            <th>تاريخ الانتهاء</th>
+            <th>المتبقي</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="spinner" id="subscriptions-spinner"></div>
+      <button class="btn btn-primary" onclick="exportSubscriptions()"><i class="fas fa-file-excel"></i> تصدير إلى Excel</button>
+      <button class="btn btn-back" onclick="showSection('dashboard')"><i class="fas fa-arrow-right"></i> العودة</button>
+    </div>
+
+    <!-- الحضور اليومي -->
+    <div id="checkin" class="section animate__animated animate__fadeInUp">
+      <h2><i class="fas fa-camera"></i> الحضور اليومي</h2>
+      <video id="camera" autoplay playsinline></video>
+      <canvas id="camera-canvas" style="display: none;"></canvas>
+      <div class="form-group">
+        <label for="search-checkin-date">ابحث عن حضور بتاريخ</label>
+        <input type="date" id="search-checkin-date" onchange="loadCheckinByDate()">
+      </div>
+      <button class="btn btn-primary" onclick="openManualCheckinModal()"><i class="fas fa-user-check"></i> تسجيل يدوي</button>
+      <button class="btn btn-danger" onclick="stopCamera()"><i class="fas fa-stop"></i> إيقاف الكاميرا</button>
+      <table id="checkin-table">
+        <thead>
+          <tr>
+            <th>الاسم</th>
+            <th>الوقت</th>
+            <th>المصدر</th>
+            <th>الحالة</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="spinner" id="checkin-spinner"></div>
+      <button class="btn btn-primary" onclick="exportCheckin()"><i class="fas fa-file-excel"></i> تصدير شيت الحضور</button>
+      <button class="btn btn-back" onclick="showSection('dashboard')"><i class="fas fa-arrow-right"></i> العودة</button>
+    </div>
+
+    <!-- لوحة التحكم -->
+    <div id="admin" class="section animate__animated animate__fadeInUp">
+      <h2><i class="fas fa-cog"></i> لوحة التحكم</h2>
+      <h3>العملاء الذين تنتهي باقاتهم اليوم</h3>
+      <table id="expiring-today">
+        <thead>
+          <tr>
+            <th>الاسم</th>
+            <th>الهاتف</th>
+            <th>تاريخ الانتهاء</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <h3>العملاء غير المدفوع أو الدفع الجزئي</h3>
+      <table id="non-paid">
+        <thead>
+          <tr>
+            <th>الاسم</th>
+            <th>الهاتف</th>
+            <th>الحالة</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <button class="btn btn-back" onclick="showSection('dashboard')"><i class="fas fa-arrow-right"></i> العودة</button>
+    </div>
+
+    <!-- المستخدمون الحاليون -->
+    <div id="current-users" class="section animate__animated animate__fadeInUp">
+      <h2><i class="fas fa-user-shield"></i> المستخدمون الحاليون</h2>
+      <button class="add-user-btn" onclick="openAddUserModal()">+ إضافة مستخدم جديد</button>
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>الاسم</th>
+            <th>الصلاحية</th>
+            <th>إجراءات</th>
+          </tr>
+        </thead>
+        <tbody id="users-list"></tbody>
+      </table>
+      <button class="btn btn-back" onclick="showSection('dashboard')"><i class="fas fa-arrow-right"></i> العودة</button>
+    </div>
+
+    <!-- نموذج إضافة مستخدم -->
+    <div id="add-user-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal" onclick="closeAddUserModal()">&times;</span>
+        <h3>إضافة مستخدم جديد</h3>
+        <div class="form-group">
+          <label for="new-username">اسم المستخدم *</label>
+          <input type="text" id="new-username" required>
+        </div>
+        <div class="form-group">
+          <label for="new-password">كلمة المرور *</label>
+          <input type="password" id="new-password" required>
+        </div>
+        <div class="position-selector">
+          <label for="new-position">الصلاحية *</label>
+          <select id="new-position" required>
+            <option value="">اختر الصلاحية</option>
+            <option value="assistant">مساعد</option>
+            <option value="captain">كابتن</option>
+            <option value="manager">مدير</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="saveNewUser()"><i class="fas fa-save"></i> حفظ المستخدم</button>
+        <button class="btn btn-back" onclick="closeAddUserModal()"><i class="fas fa-times"></i> إلغاء</button>
+      </div>
+    </div>
+
+    <!-- نموذج تعديل مستخدم -->
+    <div id="edit-user-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal" onclick="closeEditUserModal()">&times;</span>
+        <h3>تعديل مستخدم</h3>
+        <div class="form-group">
+          <label for="edit-username">اسم المستخدم *</label>
+          <input type="text" id="edit-username" required>
+        </div>
+        <div class="form-group">
+          <label for="edit-password">كلمة المرور *</label>
+          <input type="password" id="edit-password" required>
+        </div>
+        <div class="position-selector">
+          <label for="edit-position">الصلاحية *</label>
+          <select id="edit-position" required>
+            <option value="">اختر الصلاحية</option>
+            <option value="assistant">مساعد</option>
+            <option value="captain">كابتن</option>
+            <option value="manager">مدير</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="saveEditedUser()"><i class="fas fa-save"></i> حفظ التعديلات</button>
+        <button class="btn btn-danger" onclick="deleteUser()"><i class="fas fa-trash"></i> حذف المستخدم</button>
+        <button class="btn btn-back" onclick="closeEditUserModal()"><i class="fas fa-times"></i> إلغاء</button>
+      </div>
+    </div>
+
+    <!-- Modal لتسجيل الحضور اليدوي -->
+    <div id="manual-checkin-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal" onclick="closeManualCheckinModal()">&times;</span>
+        <h3>تسجيل حضور يدوي</h3>
+        <input type="text" id="search-manual-checkin" placeholder="ابحث بالاسم أو الهاتف أو ID">
+        <select id="manual-checkin-client">
+          <option value="">اختر عميل</option>
+        </select>
+        <button class="btn btn-primary" onclick="manualCheckin()"><i class="fas fa-check"></i> تسجيل الحضور</button>
+        <button class="btn btn-back" onclick="closeManualCheckinModal()"><i class="fas fa-times"></i> إلغاء</button>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>All Rights Reserved by Ramez Kamal 01002160012</p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script>
+    // تهيئة Particles.js
+    particlesJS('particles-js', {
+      particles: {
+        number: { value: 150, density: { enable: true, value_area: 800 } },
+        color: { value: '#F97316' },
+        shape: { type: 'circle' },
+        opacity: { value: 0.7, random: true },
+        size: { value: 4, random: true },
+        line_linked: { enable: true, distance: 100, color: '#F97316', opacity: 0.6, width: 1.5 },
+        move: { enable: true, speed: 4, direction: 'none', random: true }
+      },
+      interactivity: {
+        detect_on: 'canvas',
+        events: { onhover: { enable: true, mode: 'grab' }, onclick: { enable: true, mode: 'push' } },
+        modes: { grab: { distance: 300, line_linked: { opacity: 0.8 } }, push: { particles_nb: 8 } }
+      }
+    });
+
+    let currentClientId = null;
+    let videoStream = null;
+    let scanning = false;
+    let qrDataUrl = null;
+    let currentUser = null;
+    document.getElementById('client-start').value = new Date().toISOString().split('T')[0];
+
+    function toggleTheme() {
+      const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      document.querySelector('.theme-toggle i').className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    }
+
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.querySelector('.theme-toggle i').className = 'fas fa-sun';
+    }
+
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type} animate__animated animate__slideInRight`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    function getArabicPosition(pos) {
+      const map = {
+        assistant: 'مساعد',
+        captain: 'كابتن',
+        manager: 'مدير'
+      };
+      return map[pos] || pos;
+    }
+
+    // ✅ دالة التحقق من باسورد المطور
+    function checkDevPassword() {
+      const password = document.getElementById('dev-password').value.trim();
+      if (password === '#Ramez@Kamal580#') { // ← هنا الباسورد اللي انت عايزه
+        localStorage.setItem('devAccess', 'true');
+        document.getElementById('dev-password-screen').style.display = 'none';
+        showSection('login');
+      } else {
+        showToast('كلمة السر خاطئة', 'error');
+      }
+    }
+
+    // ✅ عند تحميل الصفحة، نتحقق من الباسورد الأولي
+    window.addEventListener('DOMContentLoaded', () => {
+      if (!localStorage.getItem('devAccess')) {
+        document.getElementById('dev-password-screen').style.display = 'flex';
+      } else {
+        document.getElementById('dev-password-screen').style.display = 'none';
+      }
+
+      if (!localStorage.getItem('users')) {
+        localStorage.setItem('users', JSON.stringify([
+          { username: 'admin', password: 'admin', position: 'manager' }
+        ]));
+      }
+
+      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+      if (currentUser) {
+        showSection('dashboard');
+        updateNavBasedOnRole();
+      }
+    });
+
+    function login() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      if (!username || !password) {
+        showToast('يرجى إدخال اسم المستخدم وكلمة المرور', 'error');
+        return;
+      }
+      if (username === 'admin' && password === 'admin') {
+        localStorage.setItem('currentUser', JSON.stringify({ username: 'admin', position: 'manager' }));
+        currentUser = { username: 'admin', position: 'manager' };
+        showSection('dashboard');
+        showToast('تم تسجيل الدخول كمدير بنجاح');
+        return;
+      }
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const user = users.find(u => u.username === username && u.password === password);
+      if (user) {
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        currentUser = user;
+        showSection('dashboard');
+        showToast(`تم تسجيل الدخول كـ ${getArabicPosition(user.position)}`);
+      } else {
+        showToast('اسم المستخدم أو كلمة المرور غير صحيحة', 'error');
+      }
+    }
+
+    function logout() {
+      stopCamera();
+      stopScanning();
+      showSection('login');
+      showToast('تم تسجيل الخروج');
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+      localStorage.removeItem('currentUser');
+      currentUser = null;
+    }
+
+    function showSection(sectionId) {
+      document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active', 'animate__animated', 'animate__fadeInUp', 'animate__slideInUp');
+      });
+      const section = document.getElementById(sectionId);
+      if (section) {
+        section.classList.add('active', 'animate__animated', sectionId === 'add-client' ? 'animate__slideInUp' : 'animate__fadeInUp');
+        if (sectionId === 'client-profile') {
+          if (currentUser?.position === 'assistant') {
+            showToast('ليس لديك صلاحية عرض ملفات العملاء', 'error');
+            showSection('clients');
+            return;
+          }
+        }
+        if (sectionId === 'add-client') {
+          if (currentUser?.position === 'captain') {
+            showToast('ليس لديك صلاحية إضافة عملاء', 'error');
+            showSection('clients');
+            return;
+          }
+        }
+        if (sectionId === 'checkin') {
+          if (currentUser?.position === 'captain') {
+            showToast('ليس لديك صلاحية الوصول لقسم الحضور', 'error');
+            showSection('clients');
+            return;
+          }
+        }
+        if (sectionId === 'admin' || sectionId === 'current-users') {
+          if (currentUser?.position !== 'manager') {
+            showToast('هذه الصفحة للمدير فقط', 'error');
+            showSection('dashboard');
+            return;
+          }
+        }
+        if (sectionId === 'clients') loadClients();
+        if (sectionId === 'subscriptions') loadSubscriptions();
+        if (sectionId === 'checkin') {
+          loadCheckin();
+          startCamera();
+        } else {
+          stopCamera();
+          stopScanning();
+        }
+        if (sectionId === 'admin') loadAdminDashboard();
+        if (sectionId === 'current-users') loadCurrentUsers();
+        updateNavBasedOnRole();
+      }
+    }
+
+    function updateNavBasedOnRole() {
+      const navButtons = document.querySelectorAll('.nav-button');
+      navButtons.forEach(btn => {
+        const action = btn.getAttribute('onclick');
+        let page = '';
+        if (action.includes("add-client")) page = 'add-client';
+        if (action.includes("clients")) page = 'clients';
+        if (action.includes("subscriptions")) page = 'subscriptions';
+        if (action.includes("checkin")) page = 'checkin';
+        if (action.includes("admin")) page = 'admin';
+        if (action.includes("current-users")) page = 'current-users';
+        if (!page) return;
+        switch (currentUser?.position) {
+          case 'assistant':
+            if (page === 'client-profile' || page === 'admin' || page === 'current-users') {
+              btn.style.display = 'none';
+            } else {
+              btn.style.display = 'block';
+            }
+            break;
+          case 'captain':
+            if (page === 'add-client' || page === 'checkin' || page === 'admin' || page === 'current-users') {
+              btn.style.display = 'none';
+            } else {
+              btn.style.display = 'block';
+            }
+            break;
+          case 'manager':
+            btn.style.display = 'block';
+            break;
+          default:
+            btn.style.display = 'none';
+        }
+      });
+    }
+
+    function toggleSubscriptionFields() {
+      const type = document.getElementById('client-subscription-type').value;
+      document.getElementById('monthly-details').style.display = 'none';
+      document.getElementById('koins-details').style.display = 'none';
+      if (type === 'شهري') {
+        document.getElementById('monthly-details').style.display = 'block';
+        document.getElementById('client-start').required = true;
+        document.getElementById('client-end').required = false;
+        document.getElementById('client-end-option').value = '';
+        toggleEndOption();
+      } else if (type === 'كوينز') {
+        document.getElementById('koins-details').style.display = 'block';
+        document.getElementById('client-start').required = true;
+        document.getElementById('client-end').required = true;
+      } else if (type === 'حصة') {
+        document.getElementById('client-start').required = false;
+        document.getElementById('client-end').required = false;
+      }
+    }
+
+    function toggleEndOption() {
+      const option = document.getElementById('client-end-option').value;
+      const sessionField = document.getElementById('session-count-field');
+      const manualDateField = document.getElementById('manual-end-date-field');
+      const endDateInput = document.getElementById('client-end');
+      const startDate = document.getElementById('client-start').value;
+      sessionField.style.display = 'none';
+      manualDateField.style.display = 'none';
+      if (option === 'مفتوح') {
+        if (startDate) {
+          const months = parseInt(document.getElementById('client-months').value);
+          if (months) {
+            const endDate = new Date(startDate);
+            endDate.setMonth(endDate.getMonth() + months);
+            endDateInput.value = endDate.toISOString().split('T')[0];
+          }
+        }
+      } else if (option === 'حصص') {
+        sessionField.style.display = 'block';
+      } else if (option === 'يدوي') {
+        manualDateField.style.display = 'block';
+        endDateInput.required = true;
+      } else {
+        endDateInput.value = '';
+      }
+    }
+
+    function generateQRAndCard(name, phone, birthdate, subscription, clientId, callback) {
+      if (!name || !phone || !birthdate) {
+        showToast('يرجى إدخال الاسم والهاتف وتاريخ الميلاد', 'error');
+        return;
+      }
+      document.getElementById('card-spinner').style.display = 'block';
+      const qrCodeDiv = document.getElementById('qr-code');
+      qrCodeDiv.innerHTML = '';
+      try {
+        new QRCode(qrCodeDiv, {
+          text: clientId.toString(),
+          width: 180,
+          height: 180,
+          colorDark: "#000000",
+          colorLight: "#FFFFFF",
+          correctLevel: QRCode.CorrectLevel.H
+        });
+        setTimeout(() => {
+          const qrImage = qrCodeDiv.querySelector('img');
+          if (qrImage) {
+            qrDataUrl = qrImage.src;
+            const printCard = document.createElement('div');
+            printCard.className = 'membership-card-print';
+            printCard.innerHTML = `
+              <h3>بطاقة عضوية Eagle Gym</h3>
+              <p><strong>الاسم:</strong> ${name}</p>
+              <p><strong>الهاتف:</strong> ${phone}</p>
+              <p><strong>تاريخ الميلاد:</strong> ${birthdate}</p>
+              <p><strong>الاشتراك:</strong> ${subscription}</p>
+              <p><strong>ID:</strong> ${clientId}</p>
+              <div class="qr-container"><img src="${qrDataUrl}" alt="QR Code"></div>
+            `;
+            document.body.appendChild(printCard);
+            html2canvas(printCard, {
+              scale: 4,
+              backgroundColor: '#1B263B',
+              useCORS: true,
+              allowTaint: false,
+              logging: false,
+              onclone: (clonedDoc) => {
+                const clonedCard = clonedDoc.body.querySelector('.membership-card-print');
+                clonedCard.style.transform = 'none';
+                clonedCard.style.boxShadow = 'none';
+                clonedCard.style.backdropFilter = 'none';
+                clonedCard.style.border = 'none';
+                clonedCard.querySelectorAll('p, h3').forEach(el => {
+                  el.style.textShadow = '0 1px 2px rgba(0,0,0,0.4)';
+                  el.style.color = '#FFFFFF';
+                });
+              }
+            }).then(canvas => {
+              const downloadLink = document.createElement('a');
+              downloadLink.href = canvas.toDataURL('image/png');
+              downloadLink.download = `membership_card_${name.replace(/\s+/g, '_')}.png`;
+              downloadLink.click();
+              document.body.removeChild(printCard);
+              document.getElementById('card-spinner').style.display = 'none';
+              if (callback) callback();
+            }).catch(error => {
+              console.error('خطأ في إنشاء الصورة:', error);
+              showToast('فشل إنشاء بطاقة العضوية', 'error');
+              document.body.removeChild(printCard);
+              document.getElementById('card-spinner').style.display = 'none';
+            });
+          } else {
+            showToast('فشل إنشاء رمز QR', 'error');
+            document.getElementById('card-spinner').style.display = 'none';
+          }
+        }, 500);
+      } catch (error) {
+        console.error('خطأ في إنشاء رمز QR:', error);
+        showToast('فشل إنشاء رمز QR', 'error');
+        document.getElementById('card-spinner').style.display = 'none';
+      }
+    }
+
+    function addClient() {
+      const name = document.getElementById('client-name').value.trim();
+      const phone = document.getElementById('client-phone').value.trim();
+      const idNumber = document.getElementById('client-id-number').value.trim();
+      const birthdate = document.getElementById('client-birthdate').value;
+      const height = document.getElementById('client-height').value;
+      const weight = document.getElementById('client-weight').value;
+      const address = document.getElementById('client-address').value.trim();
+      const subscriptionType = document.getElementById('client-subscription-type').value;
+
+      if (!name || !phone || !birthdate) {
+        showToast('يرجى إدخال الاسم والهاتف وتاريخ الميلاد', 'error');
+        return;
+      }
+
+      let subscription = "";
+      let remaining = 0;
+      let isSessionsBased = false;
+      let startDate = "";
+      let endDate = "";
+
+      if (subscriptionType === "حصة") {
+        subscription = "حصة";
+        remaining = 1;
+        isSessionsBased = true;
+        startDate = new Date().toISOString().split('T')[0];
+        endDate = startDate;
+      } else if (subscriptionType === "كوينز") {
+        const koinsCount = parseInt(document.getElementById('client-koins-count').value);
+        if (!koinsCount || koinsCount <= 0) {
+          showToast('يرجى إدخال عدد الكوينز صحيح', 'error');
+          return;
+        }
+        subscription = `كوينز (${koinsCount} كوينز)`;
+        remaining = koinsCount;
+        isSessionsBased = true;
+        startDate = document.getElementById('client-start').value;
+        endDate = document.getElementById('client-end').value;
+      } else if (subscriptionType === "شهري") {
+        const months = document.getElementById('client-months').value;
+        const endOption = document.getElementById('client-end-option').value;
+        if (!months || !endOption) {
+          showToast('يرجى اختيار عدد الأشهر وطريقة الإنهاء', 'error');
+          return;
+        }
+        startDate = document.getElementById('client-start').value;
+        if (endOption === "مفتوح") {
+          subscription = `شهري (${months} شهر - مفتوح)`;
+          remaining = parseInt(months) * 30;
+          isSessionsBased = false;
+          const endDateTemp = new Date(startDate);
+          endDateTemp.setMonth(endDateTemp.getMonth() + parseInt(months));
+          endDate = endDateTemp.toISOString().split('T')[0];
+        } else if (endOption === "حصص") {
+          const sessionCount = parseInt(document.getElementById('client-session-count').value);
+          if (!sessionCount || sessionCount <= 0) {
+            showToast('يرجى إدخال عدد الحصص', 'error');
+            return;
+          }
+          subscription = `شهري (${months} شهر - ${sessionCount} حصص)`;
+          remaining = sessionCount;
+          isSessionsBased = true;
+          const endDateTemp = new Date(startDate);
+          endDateTemp.setMonth(endDateTemp.getMonth() + parseInt(months));
+          endDate = endDateTemp.toISOString().split('T')[0];
+        } else if (endOption === "يدوي") {
+          subscription = `شهري (${months} شهر - محدد)`;
+          remaining = 0;
+          isSessionsBased = false;
+          endDate = document.getElementById('client-end').value;
+          if (!endDate) {
+            showToast('يرجى تحديد تاريخ الانتهاء', 'error');
+            return;
+          }
+        }
+      } else {
+        showToast('يرجى اختيار نوع الباقه', 'error');
+        return;
+      }
+
+      document.getElementById('card-spinner').style.display = 'block';
+
+      if (subscriptionType === "حصة") {
+        qrDataUrl = null;
+        createClientRecord(name, phone, idNumber, height, weight, address, birthdate, subscription,
+          document.getElementById('client-price').value || '',
+          document.getElementById('client-payment').value || 'غير مدفوع',
+          startDate, endDate, remaining, isSessionsBased, null, () => {
+            showToast('تم إضافة العميل (حصة) بنجاح');
+            resetAddClientForm();
+            showSection('dashboard');
+          });
+      } else {
+        generateQRAndCard(name, phone, birthdate, subscription, Date.now(), () => {
+          createClientRecord(name, phone, idNumber, height, weight, address, birthdate, subscription,
+            document.getElementById('client-price').value || '',
+            document.getElementById('client-payment').value || 'غير مدفوع',
+            startDate, endDate, remaining, isSessionsBased, qrDataUrl, () => {
+              showToast('تم إضافة العميل وبطاقة العضوية بنجاح');
+              qrDataUrl = null;
+              resetAddClientForm();
+              showSection('dashboard');
+            });
+        });
+      }
+    }
+
+    function createClientRecord(name, phone, idNumber, height, weight, address, birthdate, subscription, price, payment, startDate, endDate, remaining, isSessionsBased, qrCode, callback) {
+      const client = {
+        id: Date.now(),
+        name: name.trim(),
+        phone: phone.trim(),
+        idNumber: idNumber.trim(),
+        height,
+        weight,
+        address,
+        birthdate,
+        subscription,
+        price,
+        payment,
+        start: startDate,
+        end: endDate,
+        notes: document.getElementById('client-notes').value || '',
+        qrCode,
+        remaining,
+        isSessionsBased,
+        lastUpdate: new Date().toISOString().split('T')[0]
+      };
+      const clients = JSON.parse(localStorage.getItem('clients') || '[]');
+      clients.push(client);
+      localStorage.setItem('clients', JSON.stringify(clients));
+      if (callback) callback();
+    }
+
+    function resetAddClientForm() {
+      document.getElementById('add-client').querySelectorAll('input, textarea, select').forEach(el => {
+        if (el.tagName === 'SELECT') el.selectedIndex = 0;
+        else el.value = '';
+      });
+      document.getElementById('client-start').value = new Date().toISOString().split('T')[0];
+      document.getElementById('client-subscription-type').value = '';
+      document.getElementById('monthly-details').style.display = 'none';
+      document.getElementById('koins-details').style.display = 'none';
+      document.getElementById('session-count-field').style.display = 'none';
+      document.getElementById('manual-end-date-field').style.display = 'none';
+    }
+
+    function loadClients() {
+      document.getElementById('clients-spinner').style.display = 'block';
+      setTimeout(() => {
+        const clients = JSON.parse(localStorage.getItem('clients') || '[]');
+        const tbody = document.querySelector('#clients-table tbody');
+        const searchInput = document.getElementById('search-clients');
+        tbody.innerHTML = '';
+        const filteredClients = clients.filter(client =>
+          client.name.toLowerCase().includes(searchInput.value.toLowerCase()) ||
+          client.phone.includes(searchInput.value) ||
+          client.id.toString().includes(searchInput.value)
+        );
+        filteredClients.forEach(client => {
+          const row = document.createElement('tr');
+          row.className = 'animate__animated animate__fadeInUp';
+          row.innerHTML = `
+            <td>${client.id}</td>
+            <td><a href="#" onclick="viewClient(${client.id})">${client.name}</a></td>
+            <td>${client.phone}</td>
+            <td>${client.subscription}</td>
+            <td>${client.payment}</td>
+          `;
+          tbody.appendChild(row);
+        });
+        document.getElementById('clients-spinner').style.display = 'none';
+      }, 500);
+    }
+
+    document.getElementById('search-clients')?.addEventListener('input', loadClients);
+
+    function viewClient(id) {
+      currentClientId = id;
+      const clients = JSON.parse(localStorage.getItem('clients') || '[]');
+      const client = clients.find(c => c.id === id);
+      if (!client) {
+        showToast('العميل غير موجود', 'error');
+        showSection('clients');
+        return;
+      }
+      document.getElementById('client-details').innerHTML = `
+        <tr><td>الاسم</td><td>${client.name}</td></tr>
+        <tr><td>الهاتف</td><td>${client.phone}</td></tr>
+        <tr><td>الرقم القومي</td><td>${client.idNumber || 'غير محدد'}</td></tr>
+        <tr><td>تاريخ الميلاد</td><td>${client.birthdate}</td></tr>
+        <tr><td>الطول</td><td>${client.height || 'غير محدد'} سم</td></tr>
+        <tr><td>الوزن</td><td>${client.weight || 'غير محدد'} كجم</td></tr>
+        <tr><td>العنوان</td><td>${client.address || 'غير محدد'}</td></tr>
+        <tr><td>الباقة</td><td>${client.subscription}</td></tr>
+        <tr><td>من</td><td>${client.start}</td></tr>
+        <tr><td>إلى</td><td>${client.end}</td></tr>
+        <tr><td>السعر</td><td>${client.price || 'غير محدد'}</td></tr>
+        <tr><td>حالة الدفع</td><td>${client.payment}</td></tr>
+        <tr><td>المتبقي</td><td>${client.remaining} ${client.isSessionsBased ? 'حصص' : 'أيام'}</td></tr>
+        <tr><td>ملاحظات</td><td>${client.notes || 'غير محدد'}</td></tr>
+      `;
+      document.getElementById('client-qr').innerHTML = client.qrCode
+        ? `<img src="${client.qrCode}" alt="QR Code" style="max-width: 200px;">`
+        : '<p>لا يوجد رمز QR</p>';
+      showSection('client-profile');
+    }
+
+    function editClient() {
+      const clients = JSON.parse(localStorage.getItem('clients') || '[]');
+      const client = clients.find(c => c.id === currentClientId);
+      if (!client) {
+        showToast('العميل غير موجود', 'error');
+        showSection('clients');
+        return;
+      }
+      document.getElementById('client-name').value = client.name;
+      document.getElementById('client-phone').value = client.phone;
+      document.getElementById('client-id-number').value = client.idNumber || '';
+      document.getElementById('client-birthdate').value = client.birthdate;
+      document.getElementById('client-height').value = client.height || '';
+      document.getElementById('client-weight').value = client.weight || '';
+      document.getElementById('client-address').value = client.address || '';
+      document.getElementById('client-price').value = client.price || '';
+      document.getElementById('client-payment').value = client.payment;
+      document.getElementById('client-start').value = client.start;
+      document.getElementById('client-end').value = client.end;
+      document.getElementById('client-notes').value = client.notes || '';
+      if (client.subscription === "حصة") {
+        document.getElementById('client-subscription-type').value = 'حصة';
+      } else if (client.subscription.includes("كوينز")) {
+        document.getElementById('client-subscription-type').value = 'كوينز';
+        const match = client.subscription.match(/\((\d+)\s*كوينز\)/);
+        if (match) document.getElementById('client-koins-count').value = match[1];
+      } else if (client.subscription.includes("شهري")) {
+        document.getElementById('client-subscription-type').value = 'شهري';
+        const monthMatch = client.subscription.match(/(\d+)\s*شهر/);
+        if (monthMatch) document.getElementById('client-months').value = monthMatch[1];
+        if (client.subscription.includes('مفتوح')) {
+          document.getElementById('client-end-option').value = 'مفتوح';
+        } else if (client.subscription.includes('حصص')) {
+          document.getElementById('client-end-option').value = 'حصص';
+          const sessionMatch = client.subscription.match(/(\d+)\s*حصص/);
+          if (sessionMatch) document.getElementById('client-session-count').value = sessionMatch[1];
+        } else if (client.subscription.includes('محدد')) {
+          document.getElementById('client-end-option').value = 'يدوي';
+        }
+      }
+      toggleSubscriptionFields();
+      qrDataUrl = client.qrCode;
+      showSection('add-client');
+    }
+
+    function deleteClient() {
+      if (confirm('هل أنت متأكد من حذف العميل؟')) {
+        let clients = JSON.parse(localStorage.getItem('clients') || '[]');
+        clients = clients.filter(c => c.id !== currentClientId);
+        localStorage.setItem('clients', JSON.stringify(clients));
+        showToast('تم حذف العميل');
+        showSection('clients');
+      }
+    }
+
+    function loadSubscriptions() {
+      updateRemainingDays();
+      document.getElementById('subscriptions-spinner').style.display = 'block';
+      setTimeout(() => {
+        const filter = document.getElementById('subscription-filter').value;
+        const clients = JSON.parse(localStorage.getItem('clients') || '[]');
+        const tbody = document.querySelector('#subscriptions-table tbody');
+        tbody.innerHTML = '';
+        const today = new Date();
+        clients.forEach(client => {
+          const endDate = new Date(client.end);
+          const diffDays = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+          let show = false;
+          if (filter === 'all') show = true;
+          if (filter === 'today' && diffDays === 0) show = true;
+          if (filter === 'tomorrow' && diffDays === 1) show = true;
+          if (filter === 'expired' && diffDays < 0) show = true;
+          if (show) {
+            const row = document.createElement('tr');
+            row.className = 'animate__animated animate__fadeInUp';
+            row.innerHTML = `
+              <td><a href="#" onclick="viewClient(${client.id})">${client.name}</a></td>
+              <td>${client.phone}</td>
+              <td>${client.subscription}</td>
+              <td>${client.start}</td>
+              <td>${client.end}</td>
+              <td style="color: ${client.remaining < 0 ? '#DC2626' : client.remaining <= 3 ? '#F97316' : '#10B981'}">${client.remaining} ${client.isSessionsBased ? 'حصص' : 'أيام'}</td>
+            `;
+            tbody.appendChild(row);
+          }
+        });
+        document.getElementById('subscriptions-spinner').style.display = 'none';
+      }, 500);
+    }
+
+    function loadCheckin() {
+      document.getElementById('checkin-spinner').style.display = 'block';
+      setTimeout(() => {
+        const today = new Date().toISOString().split('T')[0];
+        const checkins = JSON.parse(localStorage.getItem('checkins') || '[]');
+        const filteredCheckins = checkins.filter(c => c.date === today);
+        const tbody = document.querySelector('#checkin-table tbody');
+        tbody.innerHTML = '';
+        filteredCheckins.forEach(checkin => {
+          const row = document.createElement('tr');
+          row.className = 'animate__animated animate__fadeInUp';
+          row.innerHTML = `
+            <td>${checkin.name}</td>
+            <td>${checkin.time}</td>
+            <td>${checkin.source}</td>
+            <td style="color: #10B981">${checkin.status}</td>
+          `;
+          tbody.appendChild(row);
+        });
+        document.getElementById('checkin-spinner').style.display = 'none';
+      }, 500);
+    }
+
+    function loadCheckinByDate() {
+      const date = document.getElementById('search-checkin-date').value;
+      if (!date) return;
+      document.getElementById('checkin-spinner').style.display = 'block';
+      setTimeout(() => {
+        const checkins = JSON.parse(localStorage.getItem('checkins') || '[]');
+        const filteredCheckins = checkins.filter(c => c.date === date);
+        const tbody = document.querySelector('#checkin-table tbody');
+        tbody.innerHTML = '';
+        filteredCheckins.forEach(checkin => {
+          const row = document.createElement('tr');
+          row.className = 'animate__animated animate__fadeInUp';
+          row.innerHTML = `
+            <td>${checkin.name}</td>
+            <td>${checkin.time}</td>
+            <td>${checkin.source}</td>
+            <td style="color: #10B981">${checkin.status}</td>
+          `;
+          tbody.appendChild(row);
+        });
+        document.getElementById('checkin-spinner').style.display = 'none';
+      }, 500);
+    }
+
+    function updateRemainingDays() {
+      const clients = JSON.parse(localStorage.getItem('clients') || '[]');
+      const today = new Date().toISOString().split('T')[0];
+      clients.forEach(client => {
+        const lastUpdate = new Date(client.lastUpdate);
+        const currentDate = new Date(today);
+        const diffDays = Math.floor((currentDate - lastUpdate) / (1000 * 60 * 60 * 24));
+        if (diffDays > 0 && !client.isSessionsBased && client.remaining > 0) {
+          client.remaining -= diffDays;
+          if (client.remaining < 0) client.remaining = 0;
+        }
+        client.lastUpdate = today;
+        if (client.remaining <= 0) {
+          showToast(`باقة العميل ${client.name} منتهية`);
+        }
+      });
+      localStorage.setItem('clients', JSON.stringify(clients));
+    }
+
+    function startCamera() {
+      updateRemainingDays();
+      const video = document.getElementById('camera');
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showToast('الكاميرا غير مدعومة', 'error');
+        document.getElementById('camera').style.display = 'none';
+        const placeholder = document.createElement('div');
+        placeholder.className = 'camera-placeholder';
+        placeholder.textContent = 'الكاميرا غير مدعومة';
+        document.getElementById('checkin').insertBefore(placeholder, document.getElementById('camera').nextSibling);
+        return;
+      }
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } } })
+        .then(stream => {
+          video.srcObject = stream;
+          videoStream = stream;
+          video.play().then(() => {
+            setTimeout(() => startScanning(), 500);
+          }).catch(err => {
+            console.error('خطأ في تشغيل الفيديو:', err);
+            showToast('فشل تشغيل الكاميرا', 'error');
+            document.getElementById('camera').style.display = 'none';
+            const placeholder = document.createElement('div');
+            placeholder.className = 'camera-placeholder';
+            placeholder.textContent = 'فشل تشغيل الكاميرا';
+            document.getElementById('checkin').insertBefore(placeholder, document.getElementById('camera').nextSibling);
+          });
+        })
+        .catch(err => {
+          console.error('خطأ في الوصول إلى الكاميرا:', err);
+          showToast('فشل الوصول إلى الكاميرا', 'error');
+          document.getElementById('camera').style.display = 'none';
+          const placeholder = document.createElement('div');
+          placeholder.className = 'camera-placeholder';
+          placeholder.textContent = 'الكاميرا غير متاحة';
+          document.getElementById('checkin').insertBefore(placeholder, document.getElementById('camera').nextSibling);
+        });
+    }
+
+    function stopCamera() {
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+        document.getElementById('camera').srcObject = null;
+      }
+      stopScanning();
+      const placeholder = document.querySelector('.camera-placeholder');
+      if (placeholder) placeholder.remove();
+      document.getElementById('camera').style.display = 'block';
+    }
+
+    function startScanning() {
+      if (!window.jsQR) {
+        showToast('مكتبة jsQR غير محملة', 'error');
+        scanning = false;
+        return;
+      }
+      scanning = true;
+      const video = document.getElementById('camera');
+      const canvas = document.getElementById('camera-canvas');
+      const context = canvas.getContext('2d');
+      const clients = JSON.parse(localStorage.getItem('clients') || '[]');
+
+      function scanFrame() {
+        if (!scanning) return;
+        try {
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+          const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+          if (code) {
+            const scannedId = parseInt(code.data.trim());
+            if (isNaN(scannedId)) {
+              showToast('رمز QR غير صالح', 'error');
+              return;
+            }
+            const client = clients.find(c => c.id === scannedId);
+            if (client) {
+              if (client.remaining <= 0) {
+                showToast(`باقة ${client.name} منتهية`, 'error');
+                return;
+              }
+              const today = new Date().toISOString().split('T')[0];
+              const checkin = {
+                id: Date.now(),
+                name: client.name,
+                time: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                source: 'QR',
+                status: 'تم',
+                date: today
+              };
+              const checkins = JSON.parse(localStorage.getItem('checkins') || '[]');
+              checkins.push(checkin);
+              localStorage.setItem('checkins', JSON.stringify(checkins));
+              if (client.isSessionsBased) {
+                client.remaining -= 1;
+              }
+              if (client.remaining <= 0) {
+                showToast(`باقة ${client.name} منتهية`);
+              }
+              clients[clients.findIndex(c => c.id === client.id)] = client;
+              localStorage.setItem('clients', JSON.stringify(clients));
+              showToast(`تم تسجيل حضور ${client.name}`);
+              loadCheckin();
+              scanning = false;
+              setTimeout(() => {
+                if (document.getElementById('checkin').classList.contains('active')) {
+                  startCamera();
+                }
+              }, 3000);
+            } else {
+              showToast(`لا يوجد عميل بهذا المعرف: ${scannedId}`, 'error');
+            }
+          }
+          if (scanning) requestAnimationFrame(scanFrame);
+        } catch (error) {
+          console.error('خطأ في مسح QR:', error);
+          showToast('فشل مسح رمز QR', 'error');
+          scanning = false;
+        }
+      }
+      requestAnimationFrame(scanFrame);
+    }
+
+    function stopScanning() {
+      scanning = false;
+    }
+
+    function openManualCheckinModal() {
+      const clients = JSON.parse(localStorage.getItem('clients') || '[]');
+      const select = document.getElementById('manual-checkin-client');
+      const searchInput = document.getElementById('search-manual-checkin');
+      select.innerHTML = '<option value="">اختر عميل</option>';
+      clients.forEach(client => {
+        const option = document.createElement('option');
+        option.value = client.id;
+        option.textContent = `${client.name} (${client.phone}) [ID: ${client.id}]`;
+        select.appendChild(option);
+      });
+      document.getElementById('manual-checkin-modal').style.display = 'flex';
+      searchInput.value = '';
+      searchInput.focus();
+      searchInput.addEventListener('input', () => {
+        const filter = searchInput.value.toLowerCase();
+        select.innerHTML = '<option value="">اختر عميل</option>';
+        clients
+          .filter(client =>
+            client.name.toLowerCase().includes(filter) ||
+            client.phone.includes(filter) ||
+            client.id.toString().includes(filter)
+          )
+          .forEach(client => {
+            const option = document.createElement('option');
+            option.value = client.id;
+            option.textContent = `${client.name} (${client.phone}) [ID: ${client.id}]`;
+            select.appendChild(option);
+          });
+      });
+    }
+
+    function closeManualCheckinModal() {
+      document.getElementById('manual-checkin-modal').style.display = 'none';
+      document.getElementById('manual-checkin-client').value = '';
+      document.getElementById('search-manual-checkin').value = '';
+    }
+
+    function manualCheckin() {
+      const clientId = document.getElementById('manual-checkin-client').value.trim();
+      if (!clientId) {
+        showToast('يرجى اختيار عميل', 'error');
+        return;
+      }
+      const clients = JSON.parse(localStorage.getItem('clients') || '[]');
+      const client = clients.find(c => c.id == clientId);
+      if (!client) {
+        showToast('العميل غير موجود', 'error');
+        return;
+      }
+      if (client.remaining <= 0) {
+        showToast(`باقة ${client.name} منتهية`, 'error');
+        return;
+      }
+      const today = new Date().toISOString().split('T')[0];
+      const checkin = {
+        id: Date.now(),
+        name: client.name,
+        time: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        source: 'يدوي',
+        status: 'تم',
+        date: today
+      };
+      const checkins = JSON.parse(localStorage.getItem('checkins') || '[]');
+      checkins.push(checkin);
+      localStorage.setItem('checkins', JSON.stringify(checkins));
+      if (client.isSessionsBased) {
+        client.remaining -= 1;
+      }
+      if (client.remaining <= 0) {
+        showToast(`باقة ${client.name} منتهية`);
+      }
+      clients[clients.findIndex(c => c.id == clientId)] = client;
+      localStorage.setItem('clients', JSON.stringify(clients));
+      showToast(`تم تسجيل حضور ${client.name}`);
+      loadCheckin();
+      closeManualCheckinModal();
+    }
+
+    function loadAdminDashboard() {
+      updateRemainingDays();
+      const clients = JSON.parse(localStorage.getItem('clients') || '[]');
+      const today = new Date();
+      const expiringToday = document.querySelector('#expiring-today tbody');
+      const nonPaid = document.querySelector('#non-paid tbody');
+      expiringToday.innerHTML = '';
+      nonPaid.innerHTML = '';
+      clients.forEach(client => {
+        const endDate = new Date(client.end);
+        const diffDays = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+        if (diffDays === 0) {
+          const row = document.createElement('tr');
+          row.className = 'animate__animated animate__fadeInUp';
+          row.innerHTML = `
+            <td>${client.name}</td>
+            <td>${client.phone}</td>
+            <td>${client.end}</td>
+          `;
+          expiringToday.appendChild(row);
+        }
+        if (client.payment !== 'مدفوع') {
+          const row = document.createElement('tr');
+          row.className = 'animate__animated animate__fadeInUp';
+          row.innerHTML = `
+            <td>${client.name}</td>
+            <td>${client.phone}</td>
+            <td>${client.payment}</td>
+          `;
+          nonPaid.appendChild(row);
+        }
+      });
+    }
+
+    function loadCurrentUsers() {
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const tbody = document.getElementById('users-list');
+      tbody.innerHTML = '';
+      users.forEach(user => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${user.username}</td>
+          <td>${getArabicPosition(user.position)}</td>
+          <td>
+            <button class="btn btn-primary user-actions" onclick="editUser('${user.username}')"><i class="fas fa-edit"></i></button>
+            <button class="btn btn-danger user-actions" onclick="deleteUser('${user.username}')"><i class="fas fa-trash"></i></button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function openAddUserModal() {
+      document.getElementById('add-user-modal').style.display = 'flex';
+    }
+
+    function closeAddUserModal() {
+      document.getElementById('add-user-modal').style.display = 'none';
+      document.getElementById('new-username').value = '';
+      document.getElementById('new-password').value = '';
+      document.getElementById('new-position').value = '';
+    }
+
+    function saveNewUser() {
+      const username = document.getElementById('new-username').value.trim();
+      const password = document.getElementById('new-password').value.trim();
+      const position = document.getElementById('new-position').value;
+      if (!username || !password || !position) {
+        showToast('يرجى ملء جميع الحقول', 'error');
+        return;
+      }
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const exists = users.some(u => u.username === username);
+      if (exists) {
+        showToast('اسم المستخدم موجود مسبقًا', 'error');
+        return;
+      }
+      users.push({ username, password, position });
+      localStorage.setItem('users', JSON.stringify(users));
+      showToast('تم إضافة المستخدم بنجاح');
+      closeAddUserModal();
+      loadCurrentUsers();
+    }
+
+    function editUser(username) {
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const user = users.find(u => u.username === username);
+      if (!user) {
+        showToast('المستخدم غير موجود', 'error');
+        return;
+      }
+      document.getElementById('edit-username').value = user.username;
+      document.getElementById('edit-password').value = user.password;
+      document.getElementById('edit-position').value = user.position;
+      document.getElementById('edit-user-modal').style.display = 'flex';
+    }
+
+    function closeEditUserModal() {
+      document.getElementById('edit-user-modal').style.display = 'none';
+    }
+
+    function saveEditedUser() {
+      const username = document.getElementById('edit-username').value.trim();
+      const password = document.getElementById('edit-password').value.trim();
+      const position = document.getElementById('edit-position').value;
+      if (!username || !password || !position) {
+        showToast('يرجى ملء جميع الحقول', 'error');
+        return;
+      }
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const existing = users.find(u => u.username === username && u.username !== document.getElementById('edit-username').defaultValue);
+      if (existing) {
+        showToast('اسم المستخدم موجود مسبقًا', 'error');
+        return;
+      }
+      const index = users.findIndex(u => u.username === document.getElementById('edit-username').defaultValue);
+      if (index !== -1) {
+        users[index] = { username, password, position };
+        localStorage.setItem('users', JSON.stringify(users));
+        showToast('تم تحديث المستخدم بنجاح');
+        closeEditUserModal();
+        loadCurrentUsers();
+      }
+    }
+
+    function deleteUser(username) {
+      if (!confirm('هل أنت متأكد من حذف هذا المستخدم؟ لن يمكنك استعادته.')) return;
+      let users = JSON.parse(localStorage.getItem('users') || '[]');
+      users = users.filter(u => u.username !== username);
+      localStorage.setItem('users', JSON.stringify(users));
+      showToast('تم حذف المستخدم');
+      loadCurrentUsers();
+    }
+
+    function exportClients() {
+      document.getElementById('clients-spinner').style.display = 'block';
+      setTimeout(() => {
+        const clients = JSON.parse(localStorage.getItem('clients') || '[]');
+        const ws = XLSX.utils.json_to_sheet(clients.map(c => ({
+          ID: c.id,
+          الاسم: c.name,
+          الهاتف: c.phone,
+          الرقم_القومي: c.idNumber || 'غير محدد',
+          تاريخ_الميلاد: c.birthdate,
+          الطول: c.height || 'غير محدد',
+          الوزن: c.weight || 'غير محدد',
+          العنوان: c.address || 'غير محدد',
+          نوع_الاشتراك: c.subscription,
+          حالة_الدفع: c.payment,
+          السعر: c.price || 'غير محدد',
+          تاريخ_البدء: c.start,
+          تاريخ_الانتهاء: c.end,
+          ملاحظات: c.notes || 'غير محدد'
+        })));
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Clients');
+        XLSX.writeFile(wb, `clients_${new Date().toISOString().split('T')[0].replace(/-/g, '')}.xlsx`);
+        document.getElementById('clients-spinner').style.display = 'none';
+        showToast('تم تصدير قاعدة العملاء');
+      }, 500);
+    }
+
+    function exportSubscriptions() {
+      document.getElementById('subscriptions-spinner').style.display = 'block';
+      setTimeout(() => {
+        const clients = JSON.parse(localStorage.getItem('clients') || '[]');
+        const ws = XLSX.utils.json_to_sheet(clients.map(c => ({
+          الاسم: c.name,
+          الهاتف: c.phone,
+          نوع_الاشتراك: c.subscription,
+          تاريخ_البدء: c.start,
+          تاريخ_الانتهاء: c.end,
+          المتبقي: c.remaining
+        })));
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Subscriptions');
+        XLSX.writeFile(wb, `subscriptions_${new Date().toISOString().split('T')[0].replace(/-/g, '')}.xlsx`);
+        document.getElementById('subscriptions-spinner').style.display = 'none';
+        showToast('تم تصدير الاشتراكات');
+      }, 500);
+    }
+
+    function exportCheckin() {
+      document.getElementById('checkin-spinner').style.display = 'block';
+      setTimeout(() => {
+        const checkins = JSON.parse(localStorage.getItem('checkins') || '[]');
+        const ws = XLSX.utils.json_to_sheet(checkins.map(c => ({
+          الاسم: c.name,
+          الوقت: c.time,
+          المصدر: c.source,
+          الحالة: c.status,
+          التاريخ: c.date
+        })));
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Checkins');
+        XLSX.writeFile(wb, `checkins_${new Date().toISOString().split('T')[0].replace(/-/g, '')}.xlsx`);
+        document.getElementById('checkin-spinner').style.display = 'none';
+        showToast('تم تصدير سجل الحضور');
+      }, 500);
+    }
+  </script>
+</body>
+</html>
